@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="flex h-screen w-full bg-gray-100 overflow-hidden">
-    {{-- Sidebar --}}
+    
     @include('layouts.sidebar')
 
     {{-- Main Content --}}

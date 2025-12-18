@@ -1,4 +1,4 @@
-<aside class="w-64 bg-slate-900 text-white flex flex-col flex-shrink-0 hidden md:flex transition-all duration-300">
+<aside class="w-64 bg-slate-900 text-white flex flex-col flex-shrink-0 md:flex transition-all duration-300">
     <div class="h-16 flex items-center justify-center border-b border-slate-700 bg-slate-800 shadow-md">
         <span class="text-xl font-bold tracking-wider uppercase text-blue-400">IT Center</span>
     </div>

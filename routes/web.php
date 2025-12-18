@@ -8,6 +8,7 @@ use App\Http\Controllers\ClassroomController;
 use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\SubjectController;
+use App\Http\Controllers\AttendanceController;
 
 // Trang chủ
 Route::get('/', function () {
@@ -55,5 +56,9 @@ Route::middleware('auth')->group(function () {
 
         // Quản lý Môn học (Resource)
         Route::resource('subjects', SubjectController::class);
+
+        // --- ROUTE CHO GIÁO VIÊN (Điểm danh) ---
+        Route::get('/classroom/{id}/attendance', [AttendanceController::class, 'create'])->name('attendance.create');
+        Route::post('/classroom/{id}/attendance', [AttendanceController::class, 'store'])->name('attendance.store');
     });
 });
