@@ -115,9 +115,11 @@
                                 @foreach($classroom->students as $index => $student)
                                 <tr>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $index + 1 }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm font-medium text-gray-900">{{ $student->name }}</div>
-                                        <div class="text-xs text-gray-400">ID: SV{{ str_pad($student->id, 4, '0', STR_PAD_LEFT) }}</div>
+                                    <td class="px-6 py-4">
+                                        <a href="{{ route('students.show', $student->id) }}" class="font-medium text-blue-600 hover:underline">
+                                            {{ $student->name }}
+                                        </a>
+                                        <div class="text-xs text-gray-500">{{ $student->email }}</div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="text-sm text-gray-900">{{ $student->email }}</div>

@@ -21,7 +21,8 @@ class AttendanceController extends Controller
                                  ->get()
                                  ->keyBy('student_id');
 
-        return view('teachers.attendance.create', compact('classroom', 'date', 'attendances'));
+        // Trỏ đúng vào thư mục admin/teachers/attendance
+        return view('admin.teachers.attendance.create', compact('classroom', 'date', 'attendances'));    
     }
 
     // Lưu kết quả điểm danh
