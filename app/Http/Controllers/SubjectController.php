@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Subject;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class SubjectController extends Controller
 {
@@ -23,15 +24,26 @@ class SubjectController extends Controller
     // 3. Lưu môn học mới
     public function store(Request $request)
     {
+        // 1. Bỏ check 'code' vì ta tự sinh
         $request->validate([
             'name' => 'required|string|max:255',
-            'code' => 'required|string|max:50|unique:subjects',
             'credits' => 'integer|min:1',
         ]);
 
-        Subject::create($request->all());
+        // 2. Tự sinh mã code
+        do {
+            $randomCode = strtoupper('SUB-' . Str::random(6));
+        } while (Subject::where('code', $randomCode)->exists());
 
-        return redirect()->route('subjects.index')->with('success', 'Thêm môn học thành công!');
+        // 3. Lưu vào DB (Dùng mảng thay vì request->all)
+        Subject::create([
+            'name' => $request->name,
+            'code' => $randomCode, // Mã tự sinh
+            'credits' => $request->credits,
+            'description' => $request->description,
+        ]);
+
+        return redirect()->route('subjects.index')->with('success', 'Thêm môn học thành công! Mã: ' . $randomCode);
     }
 
     // 4. Form sửa môn học

@@ -2,75 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Subject;
+use App\Models\Student;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str; // Nhớ thêm dòng này để dùng hàm random
 
-class SubjectController extends Controller
+class StudentController extends Controller
 {
+    // Hiển thị danh sách tất cả học sinh
     public function index()
     {
-        $subjects = Subject::latest()->paginate(10);
-        return view('admin.subjects.index', compact('subjects'));
-    }
-
-    public function create()
-    {
-        return view('admin.subjects.create');
-    }
-
-    // --- LƯU MÔN HỌC (Tạo mã tự động) ---
-    public function store(Request $request)
-    {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'credits' => 'integer|min:1',
-        ]);
-
-        // Logic sinh mã ngẫu nhiên: SUB-XXXXXX
-        do {
-            $randomCode = strtoupper('SUB-' . Str::random(6));
-        } while (Subject::where('code', $randomCode)->exists()); // Nếu trùng thì tạo lại cái khác
-
-        Subject::create([
-            'name' => $request->name,
-            'code' => $randomCode, // Gán mã vừa sinh
-            'credits' => $request->credits,
-            'description' => $request->description,
-        ]);
-
-        return redirect()->route('subjects.index')->with('success', 'Thêm môn học thành công! Mã: ' . $randomCode);
-    }
-
-    public function edit($id)
-    {
-        $subject = Subject::findOrFail($id);
-        return view('admin.subjects.edit', compact('subject'));
-    }
-
-    public function update(Request $request, $id)
-    {
-        $subject = Subject::findOrFail($id);
-        
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'credits' => 'integer|min:1',
-        ]);
-
-        // Không cho phép sửa mã Code để đảm bảo tính toàn vẹn dữ liệu
-        $subject->update([
-            'name' => $request->name,
-            'credits' => $request->credits,
-            'description' => $request->description,
-        ]);
-
-        return redirect()->route('subjects.index')->with('success', 'Cập nhật môn học thành công!');
-    }
-
-    public function destroy($id)
-    {
-        $subject = Subject::findOrFail($id);
-        $subject->delete();
-        return back()->with('success', 'Đã xóa môn học.');
+        // Lấy danh sách học sinh kèm thông tin lớp học, phân trang 10 em
+        $students = Student::with('classroom')->latest()->paginate(10);
+        return view('admin.students.index', compact('students'));
     }
 }

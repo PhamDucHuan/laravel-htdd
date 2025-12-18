@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Classroom;
 use App\Models\User;
+use App\Models\Subject;
 use Illuminate\Http\Request;
 
 class ClassroomController extends Controller
@@ -17,11 +18,11 @@ class ClassroomController extends Controller
 
     // Hiển thị form tạo lớp mới
     public function create()
-{
-    $teachers = User::where('role', 'teacher')->get();
-    $subjects = \App\Models\Subject::all(); // Lấy tất cả môn học
-    return view('admin.classrooms.create', compact('teachers', 'subjects'));
-}
+    {
+        $teachers = User::where('role', 'teacher')->get();
+        $subjects = Subject::all(); // Nếu thiếu dòng use ở trên, dòng này sẽ gây lỗi
+        return view('admin.classrooms.create', compact('teachers', 'subjects'));
+    }
 
     // Lưu lớp học mới
     public function store(Request $request)
