@@ -7,6 +7,8 @@ use App\Http\Middleware\CheckAdmin; // <--- QUAN TRỌNG: Gọi Middleware Check
 use App\Http\Controllers\ClassroomController; // Nhớ thêm use ở đầu file hoặc để ở đây nếu PHP 8+
 use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\StudentController;
+use App\Http\Controllers\SubjectController;
+
 // Trang chủ
 Route::get('/', function () {
     return view('welcome');
@@ -69,6 +71,12 @@ Route::middleware(CheckAdmin::class)->prefix('admin')->group(function () {
     // Route danh sách tổng quan
     Route::get('/classrooms', [ClassroomController::class, 'index'])->name('classrooms.index');
     Route::get('/students', [StudentController::class, 'index'])->name('students.index');
+
+
+    Route::middleware(CheckAdmin::class)->prefix('admin')->group(function () {
+    // ... code cũ
+    Route::resource('subjects', SubjectController::class);
+    });
 });
 });
 

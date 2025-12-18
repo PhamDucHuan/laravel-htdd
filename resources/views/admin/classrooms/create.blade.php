@@ -29,8 +29,14 @@
 
             <div class="grid grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-gray-700 font-bold mb-2">Môn học</label>
-                    <input type="text" name="subject" class="w-full border-gray-300 rounded-md shadow-sm p-2 border" placeholder="VD: PHP Backend">
+                    <label class="block text-gray-700 font-bold mb-2">Môn học <span class="text-red-500">*</span></label>
+                        <select name="subject" required class="w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-blue-500 focus:border-blue-500">
+                        <option value="">-- Chọn môn học --</option>
+                        @foreach($subjects as $sub)
+                        <option value="{{ $sub->name }}">{{ $sub->code }} - {{ $sub->name }}</option>
+                        @endforeach
+                        </select>
+                        <p class="text-xs text-gray-500 mt-1">Nếu chưa có môn, vui lòng vào <a href="{{ route('subjects.create') }}" class="text-blue-600 hover:underline">Quản lý môn học</a> để tạo trước.</p>
                 </div>
                 <div>
                     <label class="block text-gray-700 font-bold mb-2">Lịch học</label>

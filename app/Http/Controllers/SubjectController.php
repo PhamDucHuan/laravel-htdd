@@ -4,69 +4,60 @@ namespace App\Http\Controllers;
 
 use App\Models\Subject;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str; // Nhớ thêm dòng này để dùng hàm random
 
 class SubjectController extends Controller
 {
+    // 1. Danh sách môn học
     public function index()
     {
         $subjects = Subject::latest()->paginate(10);
         return view('admin.subjects.index', compact('subjects'));
     }
 
+    // 2. Form tạo môn học
     public function create()
     {
         return view('admin.subjects.create');
     }
 
-    // --- LƯU MÔN HỌC (Tạo mã tự động) ---
+    // 3. Lưu môn học mới
     public function store(Request $request)
     {
         $request->validate([
             'name' => 'required|string|max:255',
+            'code' => 'required|string|max:50|unique:subjects',
             'credits' => 'integer|min:1',
         ]);
 
-        // Logic sinh mã ngẫu nhiên: SUB-XXXXXX
-        do {
-            $randomCode = strtoupper('SUB-' . Str::random(6));
-        } while (Subject::where('code', $randomCode)->exists()); // Nếu trùng thì tạo lại cái khác
+        Subject::create($request->all());
 
-        Subject::create([
-            'name' => $request->name,
-            'code' => $randomCode, // Gán mã vừa sinh
-            'credits' => $request->credits,
-            'description' => $request->description,
-        ]);
-
-        return redirect()->route('subjects.index')->with('success', 'Thêm môn học thành công! Mã: ' . $randomCode);
+        return redirect()->route('subjects.index')->with('success', 'Thêm môn học thành công!');
     }
 
+    // 4. Form sửa môn học
     public function edit($id)
     {
         $subject = Subject::findOrFail($id);
         return view('admin.subjects.edit', compact('subject'));
     }
 
+    // 5. Cập nhật môn học
     public function update(Request $request, $id)
     {
         $subject = Subject::findOrFail($id);
         
         $request->validate([
             'name' => 'required|string|max:255',
+            'code' => 'required|string|max:50|unique:subjects,code,' . $id, // Bỏ qua check unique chính nó
             'credits' => 'integer|min:1',
         ]);
 
-        // Không cho phép sửa mã Code để đảm bảo tính toàn vẹn dữ liệu
-        $subject->update([
-            'name' => $request->name,
-            'credits' => $request->credits,
-            'description' => $request->description,
-        ]);
+        $subject->update($request->all());
 
         return redirect()->route('subjects.index')->with('success', 'Cập nhật môn học thành công!');
     }
 
+    // 6. Xóa môn học
     public function destroy($id)
     {
         $subject = Subject::findOrFail($id);

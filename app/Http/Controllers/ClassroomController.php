@@ -17,11 +17,11 @@ class ClassroomController extends Controller
 
     // Hiển thị form tạo lớp mới
     public function create()
-    {
-        // Lấy danh sách user có role là 'teacher' để gán
-        $teachers = User::where('role', 'teacher')->get();
-        return view('admin.classrooms.create', compact('teachers'));
-    }
+{
+    $teachers = User::where('role', 'teacher')->get();
+    $subjects = \App\Models\Subject::all(); // Lấy tất cả môn học
+    return view('admin.classrooms.create', compact('teachers', 'subjects'));
+}
 
     // Lưu lớp học mới
     public function store(Request $request)
