@@ -5,8 +5,8 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminController;
 use App\Http\Middleware\CheckAdmin; // <--- QUAN TRỌNG: Gọi Middleware CheckAdmin đã tạo
 use App\Http\Controllers\ClassroomController; // Nhớ thêm use ở đầu file hoặc để ở đây nếu PHP 8+
-    use App\Http\Controllers\TeacherController;
-
+use App\Http\Controllers\TeacherController;
+use App\Http\Controllers\StudentController;
 // Trang chủ
 Route::get('/', function () {
     return view('welcome');
@@ -65,6 +65,10 @@ Route::middleware(CheckAdmin::class)->prefix('admin')->group(function () {
     
     // Route xóa sinh viên (dùng hàm removeStudent)
     Route::delete('/students/{id}', [ClassroomController::class, 'removeStudent'])->name('students.destroy');
+
+    // Route danh sách tổng quan
+    Route::get('/classrooms', [ClassroomController::class, 'index'])->name('classrooms.index');
+    Route::get('/students', [StudentController::class, 'index'])->name('students.index');
 });
 });
 
