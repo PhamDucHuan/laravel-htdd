@@ -14,23 +14,23 @@ class InviteTeacherMail extends Mailable
 
     public $url; // Link đăng ký
 
-    public function __construct()
+    public function __construct($url)
     {
-        // Gán link đăng ký vào biến
-        $this->url = route('register'); 
+        $this->url = $url;
     }
 
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Lời mời tham gia hệ thống - Đăng ký Giáo viên',
+            subject: 'Lời mời tham gia hệ thống quảng trị học tập của chúng tôi',
         );
     }
 
     public function content(): Content
     {
         return new Content(
-            view: 'emails.invite', // Tên view email
+            view: 'emails.invite',
+            with: ['url' => $this->url],
         );
     }
 }

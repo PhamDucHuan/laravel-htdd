@@ -24,6 +24,19 @@
             @enderror
         </div>
 
+        <div class="mb-6">
+    <div class="flex justify-between items-center mb-2">
+        <label class="block text-gray-700 text-sm font-bold" for="password">Mật khẩu</label>
+        
+        @if (Route::has('password.request'))
+            <a class="text-sm text-blue-500 hover:text-blue-800 font-semibold" href="{{ route('password.request') }}">
+                Quên mật khẩu?
+            </a>
+        @endif
+    </div>
+
+</div>
+
         <div class="flex items-center justify-between">
             <button type="submit"
                 class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full">
@@ -31,6 +44,7 @@
             </button>
         </div>
 
+        
         <div class="mt-4 text-center">
             <a href="{{ route('register') }}" class="text-sm text-blue-500 hover:text-blue-800">Chưa có tài khoản? Đăng ký ngay</a>
         </div>

@@ -24,6 +24,20 @@ Route::middleware('guest')->group(function () {
     // Đăng nhập
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [AuthController::class, 'login']);
+
+    // --- THÊM: QUÊN MẬT KHẨU ---
+    // 1. Form nhập email
+    Route::get('/forgot-password', [AuthController::class, 'showForgotPasswordForm'])->name('password.request');
+    // 2. Gửi link reset về email
+    Route::post('/forgot-password', [AuthController::class, 'sendResetLinkEmail'])->name('password.email');
+    // 3. Form nhập mật khẩu mới (Link từ email trỏ về đây)
+    Route::get('/reset-password/{token}', [AuthController::class, 'showResetPasswordForm'])->name('password.reset');
+    // 4. Xử lý cập nhật mật khẩu mới
+    Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
+
+    // ROUTE MỚI CHO LỜI MỜI
+    Route::get('/register/invite/{token}', [AuthController::class, 'showInviteRegisterForm'])->name('register.invite');
+    Route::post('/register/invite', [AuthController::class, 'storeInviteRegister'])->name('register.invite.store');
 });
 
 // --- ĐÃ ĐĂNG NHẬP (Dùng chung cho Admin, Teacher, Student) ---
@@ -51,6 +65,9 @@ Route::middleware('auth')->group(function () {
     // 3. Xem hồ sơ chi tiết Sinh viên (Giáo viên xem sinh viên trong lớp)
     Route::get('/students/{id}', [StudentController::class, 'show'])->name('students.show');
 
+    // --- THÊM: ĐỔI MẬT KHẨU (Cho người đang đăng nhập) ---
+    Route::get('/change-password', [AuthController::class, 'showChangePasswordForm'])->name('password.change');
+    Route::post('/change-password', [AuthController::class, 'changePassword'])->name('password.change.store');
 
     // ============================================================
     // KHU VỰC QUẢN TRỊ VIÊN (CHỈ ADMIN MỚI VÀO ĐƯỢC)

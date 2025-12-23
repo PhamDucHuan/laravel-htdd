@@ -101,7 +101,12 @@
                     @endif
                 </p>
             </div>
-            
+            <li class="mb-2">
+    <a href="{{ route('password.change') }}" class="block py-2 px-4 rounded hover:bg-gray-700 flex items-center {{ request()->routeIs('password.change') ? 'bg-gray-700' : '' }}">
+        <span class="mr-2">🔐</span> 
+        Đổi mật khẩu
+    </a>
+</li>
             {{-- Nút Đăng xuất --}}
             <form method="POST" action="{{ route('logout') }}">
                 @csrf

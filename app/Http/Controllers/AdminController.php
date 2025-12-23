@@ -4,31 +4,44 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
-use App\Mail\InviteTeacherMail; // Đảm bảo đã có Mailable này
-use App\Models\User;
+use Illuminate\Support\Facades\DB; // <-- Cần cái này để thao tác bảng invitations
+use Illuminate\Support\Str;        // <-- Cần để tạo token ngẫu nhiên
+use App\Mail\InviteTeacherMail;
 
 class AdminController extends Controller
 {
-    // Hiển thị form mời
     public function showInviteForm()
     {
-        // Kiểm tra xem file view này có tồn tại không: resources/views/admin/invite.blade.php
         return view('admin.invite'); 
     }
 
-    // Xử lý gửi email
     public function sendInvite(Request $request)
     {
         $request->validate([
-            'email' => 'required|email|unique:users,email'
+            'email' => 'required|email|unique:users,email' // Đảm bảo email chưa đăng ký
         ]);
 
-        // Gửi mail (Nếu bạn chưa cấu hình mail, đoạn này sẽ lỗi)
-        // Nếu chỉ test giao diện, bạn có thể comment dòng Mail::to... lại
+        // 1. Tạo token ngẫu nhiên
+        $token = Str::random(32);
+
+        // 2. Lưu vào bảng invitations (Xóa cũ nếu có để tránh rác)
+        DB::table('invitations')->where('email', $request->email)->delete();
         
+        DB::table('invitations')->insert([
+            'email' => $request->email,
+            'token' => $token,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        // 3. Tạo link đăng ký kèm token
+        // Ví dụ: http://yoursite.com/register/invite/abcd1234xyz...
+        $url = route('register.invite', ['token' => $token]);
+
+        // 4. Gửi mail chứa Link
         try {
-            Mail::to($request->email)->send(new InviteTeacherMail());
-            return back()->with('success', 'Đã gửi lời mời tới ' . $request->email);
+            Mail::to($request->email)->send(new InviteTeacherMail($url));
+            return back()->with('success', 'Đã gửi lời mời tham gia tới ' . $request->email);
         } catch (\Exception $e) {
             return back()->with('error', 'Lỗi gửi mail: ' . $e->getMessage());
         }
