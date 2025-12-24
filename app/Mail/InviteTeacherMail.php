@@ -22,7 +22,7 @@ class InviteTeacherMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Lời mời tham gia hệ thống quảng trị học tập của chúng tôi',
+            subject: 'Lời mời tham gia hệ thống quản trị học tập của chúng tôi',
         );
     }
 
