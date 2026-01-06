@@ -5,82 +5,96 @@ namespace App\Http\Controllers;
 use App\Models\Classroom;
 use App\Models\User;
 use App\Models\Subject;
+use App\Models\ClassSession; // <-- Bắt buộc có để tạo lịch
 use Illuminate\Http\Request;
+use Carbon\Carbon;           // <-- Bắt buộc để xử lý ngày tháng
 
 class ClassroomController extends Controller
 {
-    // Hiển thị danh sách lớp (cho Dashboard Admin)
+    // Hiển thị danh sách lớp
     public function index()
     {
         $classrooms = Classroom::with('teacher')->latest()->get();
         return view('admin.classrooms.index', compact('classrooms'));
     }
 
-    // Hiển thị form tạo lớp mới
+    // Hiển thị form tạo lớp
     public function create()
     {
+        // Lấy danh sách giáo viên và môn học để hiển thị trong select box
         $teachers = User::where('role', 'teacher')->get();
-        $subjects = Subject::all(); // Nếu thiếu dòng use ở trên, dòng này sẽ gây lỗi
+        $subjects = Subject::all(); 
         return view('admin.classrooms.create', compact('teachers', 'subjects'));
     }
 
-    // Lưu lớp học mới
+    // Xử lý lưu lớp học và tạo lịch tự động
     public function store(Request $request)
     {
+        // 1. Validate dữ liệu
         $request->validate([
             'name' => 'required|string|max:255',
-            'teacher_id' => 'required|exists:users,id', // Bắt buộc chọn giáo viên
+            'teacher_id' => 'required|exists:users,id',
+            'subject_id' => 'required', // Sửa từ 'subject' thành 'subject_id' cho khớp với Form
             'start_date' => 'required|date',
-            'schedule' => 'required|string',
+            'end_date'   => 'required|date|after_or_equal:start_date',
+            'days'       => 'required|array|min:1', // Bắt buộc chọn ít nhất 1 thứ
         ]);
 
-        Classroom::create([
+        // 2. Tạo Lớp học (Classroom)
+        // Lưu ý: Nếu database của bạn cột là 'subject' (string), ta lưu tạm subject_id vào đó
+        $classroom = Classroom::create([
             'name' => $request->name,
             'teacher_id' => $request->teacher_id,
-            'subject' => $request->subject,
+            'subject' => $request->subject_id, // Lưu ID môn học
             'start_date' => $request->start_date,
             'end_date' => $request->end_date,
-            'schedule' => $request->schedule,
             'description' => $request->description,
-            'status' => 'pending', // Mặc định là 'Chờ'
+            'schedule' => implode(',', $request->days), // Lưu tạm các thứ đã chọn (VD: "2,4,6")
+            'status' => 'pending',
         ]);
 
-        return redirect()->route('dashboard')->with('success', 'Đã tạo lớp học thành công!');
+        // 3. LOGIC TỰ ĐỘNG TẠO BUỔI HỌC (Loop từ ngày bắt đầu -> kết thúc)
+        $startDate = Carbon::parse($request->start_date);
+        $endDate   = Carbon::parse($request->end_date);
+        $daysOfWeek = $request->days; // Mảng các thứ: [2, 4, 6]
+
+        for ($date = $startDate; $date->lte($endDate); $date->addDay()) {
+            // Kiểm tra nếu ngày hiện tại trùng với thứ đã chọn
+            if (in_array($date->dayOfWeekIso, $daysOfWeek)) {
+                ClassSession::create([
+                    'classroom_id' => $classroom->id,
+                    'date'         => $date->format('Y-m-d'),
+                    'start_time'   => $request->session_start_time,
+                    'end_time'     => $request->session_end_time,
+                ]);
+            }
+        }
+
+        return redirect()->route('classrooms.index')
+            ->with('success', 'Đã tạo lớp học và lịch học thành công!');
     }
-    // --- MỚI: XEM CHI TIẾT LỚP HỌC ---
+
+    // Xem chi tiết lớp
     public function show($id)
     {
-        // Lấy thông tin lớp kèm theo Giáo viên và Sinh viên
-        $classroom = Classroom::with(['teacher', 'students'])->findOrFail($id);
-        
+        $classroom = Classroom::with(['teacher', 'students', 'sessions'])->findOrFail($id);
         return view('admin.classrooms.show', compact('classroom'));
     }
 
-    // --- MỚI: THÊM SINH VIÊN VÀO LỚP ---
+    // Thêm sinh viên vào lớp
     public function addStudent(Request $request, $id)
     {
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'nullable|email',
-            'phone' => 'nullable|string|max:15',
         ]);
 
-        // Tạo sinh viên mới gắn với classroom_id này
         \App\Models\Student::create([
             'name' => $request->name,
             'email' => $request->email,
-            'phone' => $request->phone,
             'classroom_id' => $id,
         ]);
 
         return back()->with('success', 'Đã thêm sinh viên thành công!');
-    }
-    
-    // --- MỚI: XÓA SINH VIÊN KHỎI LỚP (Tùy chọn) ---
-    public function removeStudent($id)
-    {
-        $student = \App\Models\Student::findOrFail($id);
-        $student->delete();
-        return back()->with('success', 'Đã xóa sinh viên khỏi lớp.');
     }
 }

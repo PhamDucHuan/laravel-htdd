@@ -133,6 +133,30 @@
                                         </form>
                                     </td>
                                 </tr>
+
+                                <h3 class="text-xl font-bold mt-6 mb-4">Lịch Học Chi Tiết</h3>
+<table class="min-w-full bg-white border">
+    <thead>
+        <tr>
+            <th class="py-2 px-4 border">Ngày</th>
+            <th class="py-2 px-4 border">Thứ</th>
+            <th class="py-2 px-4 border">Thời gian</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach($classroom->sessions as $session) 
+        <tr>
+            <td class="py-2 px-4 border">{{ \Carbon\Carbon::parse($session->date)->format('d/m/Y') }}</td>
+            <td class="py-2 px-4 border">
+                {{ \Carbon\Carbon::parse($session->date)->dayName }}
+            </td>
+            <td class="py-2 px-4 border">
+                {{ $session->start_time }} - {{ $session->end_time }}
+            </td>
+        </tr>
+        @endforeach
+    </tbody>
+</table>
                                 @endforeach
 
                                 @if($classroom->students->isEmpty())

@@ -4,6 +4,18 @@
 <div class="flex h-screen w-full bg-gray-100 overflow-hidden">
     {{-- 1. Sidebar --}}
     @include('layouts.sidebar')
+    
+    @if ($errors->any())
+    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
+        <strong class="font-bold">Không thể tạo lớp!</strong>
+        <span class="block sm:inline">Vui lòng kiểm tra lại các thông tin sau:</span>
+        <ul class="list-disc list-inside mt-2">
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
 
     {{-- 2. Nội dung chính --}}
     <div class="flex-1 flex flex-col min-w-0 overflow-hidden bg-gray-50">
@@ -35,17 +47,16 @@
                         </div>
 
                         <div class="mb-4">
-                            <label class="block text-gray-700 font-bold mb-2">Môn học <span class="text-red-500">*</span></label>
-                            <select name="subject" required class="w-full border-gray-300 rounded-lg shadow-sm p-2.5 border focus:ring-blue-500 focus:border-blue-500">
-                                <option value="">-- Chọn môn học --</option>
-                                @foreach($subjects as $sub)
-                                    <option value="{{ $sub->name }} ({{ $sub->code }})">
-                                        {{ $sub->code }} - {{ $sub->name }} ({{ $sub->credits }} tín chỉ)
-                                    </option>
-                                @endforeach
-                            </select>
-                            <p class="text-xs text-gray-500 mt-1">Nếu chưa có môn, <a href="{{ route('subjects.create') }}" class="text-blue-600 hover:underline">tạo môn học mới tại đây</a>.</p>
-                        </div>
+    <label class="block text-gray-700 font-bold mb-2">Môn học</label>
+    
+    <select name="subject_id" class="border rounded w-full py-2 px-3">
+        @foreach($subjects as $subject)
+            <option value="{{ $subject->id }}">
+                {{ $subject->name }} ({{ $subject->code }})
+            </option>
+        @endforeach
+    </select>
+</div>
 
                         <div class="mb-4">
                             <label class="block text-gray-700 font-bold mb-2">Giáo viên phụ trách <span class="text-red-500">*</span></label>
@@ -72,6 +83,64 @@
                             <label class="block text-gray-700 font-bold mb-2">Mô tả chi tiết</label>
                             <textarea name="description" rows="3" class="w-full border-gray-300 rounded-lg shadow-sm p-2.5 border focus:ring-blue-500 focus:border-blue-500"></textarea>
                         </div>
+
+                        <div class="mt-8 border-t pt-6">
+    <h3 class="text-lg font-bold text-gray-800 mb-4">Cấu hình Lịch học Tự động</h3>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <div>
+            <label class="block text-gray-700 font-bold mb-2">Ngày bắt đầu khóa học</label>
+            <input type="date" name="start_date" required class="shadow border rounded w-full py-2 px-3 text-gray-700">
+        </div>
+        <div>
+            <label class="block text-gray-700 font-bold mb-2">Ngày kết thúc dự kiến</label>
+            <input type="date" name="end_date" required class="shadow border rounded w-full py-2 px-3 text-gray-700">
+        </div>
+
+        <div>
+            <label class="block text-gray-700 font-bold mb-2">Giờ vào lớp</label>
+            <input type="time" name="session_start_time" class="shadow border rounded w-full py-2 px-3 text-gray-700">
+        </div>
+        <div>
+            <label class="block text-gray-700 font-bold mb-2">Giờ tan lớp</label>
+            <input type="time" name="session_end_time" class="shadow border rounded w-full py-2 px-3 text-gray-700">
+        </div>
+    </div>
+
+    <div class="mb-4">
+        <label class="block text-gray-700 font-bold mb-2">Chọn các thứ trong tuần học:</label>
+        <div class="flex flex-wrap gap-4">
+            <label class="inline-flex items-center">
+                <input type="checkbox" name="days[]" value="1" class="form-checkbox h-5 w-5 text-blue-600">
+                <span class="ml-2">Thứ 2</span>
+            </label>
+            <label class="inline-flex items-center">
+                <input type="checkbox" name="days[]" value="2" class="form-checkbox h-5 w-5 text-blue-600">
+                <span class="ml-2">Thứ 3</span>
+            </label>
+            <label class="inline-flex items-center">
+                <input type="checkbox" name="days[]" value="3" class="form-checkbox h-5 w-5 text-blue-600">
+                <span class="ml-2">Thứ 4</span>
+            </label>
+            <label class="inline-flex items-center">
+                <input type="checkbox" name="days[]" value="4" class="form-checkbox h-5 w-5 text-blue-600">
+                <span class="ml-2">Thứ 5</span>
+            </label>
+            <label class="inline-flex items-center">
+                <input type="checkbox" name="days[]" value="5" class="form-checkbox h-5 w-5 text-blue-600">
+                <span class="ml-2">Thứ 6</span>
+            </label>
+            <label class="inline-flex items-center">
+                <input type="checkbox" name="days[]" value="6" class="form-checkbox h-5 w-5 text-blue-600">
+                <span class="ml-2">Thứ 7</span>
+            </label>
+            <label class="inline-flex items-center">
+                <input type="checkbox" name="days[]" value="7" class="form-checkbox h-5 w-5 text-blue-600">
+                <span class="ml-2">Chủ Nhật</span>
+            </label>
+        </div>
+    </div>
+</div>
 
                         <div class="flex justify-end gap-3">
                             <a href="{{ route('classrooms.index') }}" class="px-4 py-2.5 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition">Hủy</a>

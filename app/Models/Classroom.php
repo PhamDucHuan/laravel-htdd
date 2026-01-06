@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\ClassSession;
 
 class Classroom extends Model
 {
@@ -24,5 +25,11 @@ class Classroom extends Model
     public function students()
     {
         return $this->hasMany(Student::class);
+    }
+
+    public function sessions()
+    {
+        // Sắp xếp theo ngày tăng dần để hiển thị lịch học hợp lý
+        return $this->hasMany(ClassSession::class)->orderBy('date', 'asc');
     }
 }
