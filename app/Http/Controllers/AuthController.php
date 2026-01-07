@@ -171,7 +171,7 @@ class AuthController extends Controller
  
         $request->session()->regenerateToken(); // Tạo lại token bảo mật
  
-        return redirect('/login'); // Quay về trang đăng nhập
+        return redirect()->route('home'); // Quay về trang chủ
     }
 
     // 1. Hiển thị form đăng ký đặc biệt cho lời mời

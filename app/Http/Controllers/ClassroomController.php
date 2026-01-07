@@ -95,13 +95,18 @@ class ClassroomController extends Controller
     }
 
     // Xem chi tiết lớp
-    public function show($id)
+    // app/Http/Controllers/ClassroomController.php
+
+public function show($id)
 {
-    // Lấy lớp học + sinh viên + các buổi học (kèm đếm số lượt điểm danh)
+    // Tìm lớp học theo ID
+    // with('sessions'): Lấy kèm danh sách buổi học
+    // with('students'): Lấy kèm danh sách sinh viên
     $classroom = Classroom::with(['teacher', 'students', 'sessions' => function($query) {
-        $query->withCount('attendances'); // Đếm xem buổi này đã có dữ liệu điểm danh chưa
+        $query->orderBy('date', 'asc') // Sắp xếp ngày học tăng dần
+              ->orderBy('start_time', 'asc');
     }])->findOrFail($id);
-    
+
     return view('admin.classrooms.show', compact('classroom'));
 }
 
@@ -120,5 +125,19 @@ class ClassroomController extends Controller
         ]);
 
         return back()->with('success', 'Đã thêm sinh viên thành công!');
+    }
+
+    // app/Http/Controllers/ClassroomController.php
+
+    public function myClasses()
+    {
+    $user = \Illuminate\Support\Facades\Auth::user();
+    
+    // Lấy các lớp mà giáo viên này đứng lớp (kèm số lượng sinh viên)
+    $classrooms = Classroom::where('teacher_id', $user->id)
+                           ->withCount('students')
+                           ->get();
+
+    return view('teachers.classrooms.index', compact('classrooms'));
     }
 }

@@ -30,4 +30,6 @@ public function attendances()
 {
     return $this->hasMany(Attendance::class);
 }
+
+// app/Models/ClassSession.php
 }

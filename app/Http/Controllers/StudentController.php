@@ -36,4 +36,17 @@ class StudentController extends Controller
 
     return view('admin.students.show', compact('student', 'attendanceHistory'));
     }
+
+    // app/Http/Controllers/StudentController.php
+    public function myStudents()
+    {
+    $teacherId = Auth::id();
+
+    // Lấy sinh viên thuộc các lớp mà giáo viên này dạy
+    $students = \App\Models\Student::whereHas('classroom', function($q) use ($teacherId) {
+        $q->where('teacher_id', $teacherId);
+    })->with('classroom')->get();
+
+    return view('teachers.students.index', compact('students'));
+    }
 }

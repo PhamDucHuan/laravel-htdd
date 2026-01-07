@@ -119,6 +119,13 @@ Route::middleware('auth')->group(function () {
         Route::resource('subjects', SubjectController::class);
     });
 
+    // ... Bên trong middleware auth ...
+
+        // 1. Trang "Lớp học của tôi" (Dành cho giáo viên xem lớp mình dạy)
+        Route::get('/my-classrooms', [ClassroomController::class, 'myClasses'])->name('teachers.classrooms');
+
+        // 2. Trang "Danh sách sinh viên" (Toàn bộ sinh viên của giáo viên đó)
+        Route::get('/my-students', [StudentController::class, 'myStudents'])->name('teachers.students');
     // routes/web.php
 // ... Các route auth/admin ở dưới giữ nguyên
 });

@@ -36,9 +36,17 @@
                                 {{ $class->students->count() }} SV
                             </span>
                         </td>
-                        <td class="px-6 py-4 text-right">
-                            <a href="{{ route('classrooms.show', $class->id) }}" class="text-blue-600 hover:text-blue-900 text-sm">Chi tiết &rarr;</a>
-                        </td>
+                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+    
+                        <a href="{{ route('classrooms.show', $classroom->id) }}" 
+                            class="text-blue-600 hover:text-blue-900 font-bold mr-3 border border-blue-600 px-3 py-1 rounded hover:bg-blue-50">
+                                📄 Chi tiết
+                        </a>
+
+                        @if(Auth::user()->role == 'admin')
+                        <a href="{{ route('classrooms.edit', $classroom->id) }}" class="text-indigo-600 hover:text-indigo-900 mr-2">Sửa</a>
+                        @endif
+                    </td>
                     </tr>
                     @endforeach
                 </tbody>

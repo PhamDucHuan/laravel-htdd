@@ -3,135 +3,133 @@
 @section('content')
 <div class="container mx-auto px-4 py-8">
     
-    <div class="flex justify-between items-center mb-6">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
-            <h2 class="text-2xl font-bold text-gray-800">Lớp: {{ $classroom->name }}</h2>
-            <p class="text-gray-600">Giáo viên: {{ $classroom->teacher->name ?? 'Chưa gán' }}</p>
+            <h1 class="text-3xl font-bold text-gray-800">{{ $classroom->name }}</h1>
+            <p class="text-gray-600 mt-1">
+                <span class="font-bold">Giáo viên:</span> {{ $classroom->teacher->name ?? 'Chưa gán' }} | 
+                <span class="font-bold">Sĩ số:</span> {{ $classroom->students->count() }} sinh viên
+            </p>
         </div>
-        <a href="{{ route('dashboard') }}" class="text-blue-500 hover:underline">&larr; Quay lại Dashboard</a>
+        <a href="{{ route('dashboard') }}" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded shadow transition">
+            &larr; Quay lại Dashboard
+        </a>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
-        <div class="lg:col-span-2 space-y-6">
-            <div class="bg-white shadow-md rounded-lg p-6">
-                <div class="flex justify-between items-center mb-4 border-b pb-2">
-                    <h3 class="text-xl font-bold text-blue-800">📅 Lịch Học & Điểm Danh</h3>
+        <div class="lg:col-span-2">
+            <div class="bg-white shadow-lg rounded-xl overflow-hidden border border-gray-100">
+                <div class="bg-blue-600 px-6 py-4 flex justify-between items-center">
+                    <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                        📅 Danh Sách Buổi Học
+                    </h3>
+                    <span class="text-blue-100 text-sm bg-blue-700 px-2 py-1 rounded">
+                        Tổng: {{ $classroom->sessions->count() }} buổi
+                    </span>
                 </div>
 
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th class="px-4 py-2 text-left text-xs font-bold text-gray-500 uppercase">Ngày</th>
-                                <th class="px-4 py-2 text-left text-xs font-bold text-gray-500 uppercase">Giờ học</th>
-                                <th class="px-4 py-2 text-center text-xs font-bold text-gray-500 uppercase">Trạng thái</th>
-                                <th class="px-4 py-2 text-right text-xs font-bold text-gray-500 uppercase">Hành động</th>
+                                <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Thời gian</th>
+                                <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Thứ</th>
+                                <th class="px-6 py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">Trạng thái</th>
+                                <th class="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Hành động</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-200">
+                        <tbody class="bg-white divide-y divide-gray-200">
                             @forelse($classroom->sessions as $session)
-                            <tr class="hover:bg-gray-50">
-                                <td class="px-4 py-3 whitespace-nowrap">
-                                    <div class="font-medium text-gray-900">
+                            <tr class="hover:bg-blue-50 transition duration-150">
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-bold text-gray-900">
                                         {{ \Carbon\Carbon::parse($session->date)->format('d/m/Y') }}
                                     </div>
                                     <div class="text-xs text-gray-500">
-                                        {{ \Carbon\Carbon::parse($session->date)->dayName }}
+                                        {{ \Carbon\Carbon::parse($session->start_time)->format('H:i') }} - 
+                                        {{ \Carbon\Carbon::parse($session->end_time)->format('H:i') }}
                                     </div>
                                 </td>
-                                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
-                                    {{ \Carbon\Carbon::parse($session->start_time)->format('H:i') }} - 
-                                    {{ \Carbon\Carbon::parse($session->end_time)->format('H:i') }}
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                                        {{ \Carbon\Carbon::parse($session->date)->dayName }}
+                                    </span>
                                 </td>
-                                <td class="px-4 py-3 whitespace-nowrap text-center">
-                                    @if($session->attendances_count > 0)
-                                        <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                            Đã điểm danh
+                                <td class="px-6 py-4 whitespace-nowrap text-center">
+                                    @if($session->attendances->count() > 0)
+                                        <span class="px-2 py-1 text-xs font-bold text-green-700 bg-green-100 rounded-full border border-green-200">
+                                            ✓ Đã điểm danh
                                         </span>
                                     @else
-                                        <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
-                                            Chưa
+                                        <span class="px-2 py-1 text-xs font-bold text-yellow-700 bg-yellow-100 rounded-full border border-yellow-200">
+                                            Chưa điểm danh
                                         </span>
                                     @endif
                                 </td>
-                                <td class="px-4 py-3 whitespace-nowrap text-right text-sm font-medium">
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                     <a href="{{ route('attendance.create', $session->id) }}" 
-                                       class="inline-flex items-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded shadow">
-                                        📝 Điểm danh
+                                       class="inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                        📝 Điểm Danh
                                     </a>
                                 </td>
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="4" class="px-4 py-4 text-center text-gray-500 italic">
-                                    Chưa có lịch học. Vui lòng tạo tự động hoặc thêm thủ công.
+                                <td colspan="4" class="px-6 py-10 text-center text-gray-500 italic">
+                                    <div class="flex flex-col items-center">
+                                        <svg class="w-12 h-12 text-gray-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                        <p>Lớp này chưa có lịch học nào được tạo.</p>
+                                    </div>
                                 </td>
                             </tr>
                             @endforelse
                         </tbody>
                     </table>
                 </div>
-
-                <div class="mt-6 pt-4 border-t">
-                    <details>
-                        <summary class="cursor-pointer text-blue-600 text-sm font-bold select-none">
-                            + Thêm buổi học bổ sung
-                        </summary>
-                        <form action="{{ route('classrooms.sessions.store', $classroom->id) }}" method="POST" class="mt-4 bg-gray-50 p-4 rounded">
-                            @csrf
-                            <div class="grid grid-cols-3 gap-4">
-                                <div>
-                                    <label class="text-xs font-bold">Ngày</label>
-                                    <input type="date" name="date" required class="w-full border rounded px-2 py-1">
-                                </div>
-                                <div>
-                                    <label class="text-xs font-bold">Bắt đầu</label>
-                                    <input type="time" name="start_time" required class="w-full border rounded px-2 py-1">
-                                </div>
-                                <div>
-                                    <label class="text-xs font-bold">Kết thúc</label>
-                                    <input type="time" name="end_time" required class="w-full border rounded px-2 py-1">
-                                </div>
-                            </div>
-                            <button type="submit" class="mt-2 bg-gray-600 text-white text-xs py-1 px-3 rounded hover:bg-gray-700">Lưu</button>
-                        </form>
-                    </details>
-                </div>
             </div>
         </div>
 
         <div class="lg:col-span-1">
-            <div class="bg-white shadow-md rounded-lg p-6">
-                <h3 class="text-lg font-bold text-gray-700 mb-4 border-b pb-2">Danh sách Sinh viên</h3>
-                
-                <ul class="space-y-3 max-h-96 overflow-y-auto">
-                    @forelse($classroom->students as $student)
-                    <li class="flex items-center justify-between p-2 hover:bg-gray-50 rounded">
-                        <div class="flex items-center">
-                            <div class="bg-blue-100 text-blue-800 font-bold rounded-full w-8 h-8 flex items-center justify-center mr-3">
-                                {{ substr($student->name, 0, 1) }}
+            <div class="bg-white shadow-lg rounded-xl overflow-hidden border border-gray-100">
+                <div class="bg-gray-800 px-6 py-4">
+                    <h3 class="text-lg font-bold text-white">👨‍🎓 Sinh Viên Lớp</h3>
+                </div>
+                <div class="p-0">
+                    <ul class="divide-y divide-gray-200 max-h-[500px] overflow-y-auto">
+                        @forelse($classroom->students as $student)
+                        <li class="p-4 flex items-center hover:bg-gray-50">
+                            <div class="flex-shrink-0">
+                                <span class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold">
+                                    {{ substr($student->name, 0, 1) }}
+                                </span>
                             </div>
-                            <div>
-                                <p class="text-sm font-bold text-gray-800">{{ $student->name }}</p>
+                            <div class="ml-3">
+                                <p class="text-sm font-medium text-gray-900">{{ $student->name }}</p>
                                 <p class="text-xs text-gray-500">{{ $student->email }}</p>
                             </div>
-                        </div>
-                    </li>
-                    @empty
-                    <li class="text-gray-500 text-sm italic">Chưa có sinh viên nào.</li>
-                    @endforelse
-                </ul>
-
-                <div class="mt-4 pt-4 border-t">
+                        </li>
+                        @empty
+                        <li class="p-6 text-center text-gray-500 italic text-sm">
+                            Chưa có sinh viên nào trong lớp này.
+                        </li>
+                        @endforelse
+                    </ul>
+                </div>
+                
+                @if(Auth::user()->role == 'admin')
+                <div class="p-4 bg-gray-50 border-t">
                     <form action="{{ route('classrooms.students.add', $classroom->id) }}" method="POST">
                         @csrf
-                        <input type="text" name="name" placeholder="Tên sinh viên mới..." required class="w-full border rounded px-3 py-2 text-sm mb-2">
-                        <button type="submit" class="w-full bg-green-500 text-white font-bold py-2 rounded hover:bg-green-600 text-sm">
-                            + Thêm Sinh viên
+                        <div class="mb-2">
+                            <input type="text" name="name" placeholder="Tên sinh viên..." required class="w-full text-sm border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded text-sm transition">
+                            + Thêm Sinh Viên
                         </button>
                     </form>
                 </div>
+                @endif
             </div>
         </div>
     </div>
