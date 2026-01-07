@@ -118,4 +118,27 @@ Route::middleware('auth')->group(function () {
         // --- QUẢN LÝ MÔN HỌC ---
         Route::resource('subjects', SubjectController::class);
     });
+
+    // routes/web.php
+// ... Các route auth/admin ở dưới giữ nguyên
 });
+
+// 1. Trang chủ (Đặt tên là 'home' để gọi trong menu)
+Route::get('/', function () {
+    return view('welcome');
+})->name('home');
+
+// 2. Trang Khóa học
+Route::get('/khoa-hoc', function () {
+    return view('courses');
+})->name('courses');
+
+// 3. Trang Về chúng tôi
+Route::get('/ve-chung-toi', function () {
+    return view('about');
+})->name('about');
+
+// 4. Trang Liên hệ
+Route::get('/lien-he', function () {
+    return view('contact');
+})->name('contact');
