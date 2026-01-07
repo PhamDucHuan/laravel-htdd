@@ -3,7 +3,6 @@
 @section('content')
 <div class="flex h-screen w-full bg-gray-100 overflow-hidden">
     {{-- 1. Sidebar --}}
-    @include('layouts.sidebar')
     
     @if ($errors->any())
     <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">

@@ -131,13 +131,14 @@ public function show($id)
 
     public function myClasses()
     {
-    $user = \Illuminate\Support\Facades\Auth::user();
+        $user = \Illuminate\Support\Facades\Auth::user();
+        
+        // Thêm ->with('subjectInfo') vào câu truy vấn
+        $classrooms = Classroom::where('teacher_id', $user->id)
+                               ->withCount('students')
+                               ->with('subjectInfo') // <--- THÊM DÒNG NÀY
+                               ->get();
     
-    // Lấy các lớp mà giáo viên này đứng lớp (kèm số lượng sinh viên)
-    $classrooms = Classroom::where('teacher_id', $user->id)
-                           ->withCount('students')
-                           ->get();
-
-    return view('teachers.classrooms.index', compact('classrooms'));
+        return view('teachers.classrooms.index', compact('classrooms'));
     }
 }

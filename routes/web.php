@@ -117,6 +117,15 @@ Route::middleware('auth')->group(function () {
 
         // --- QUẢN LÝ MÔN HỌC ---
         Route::resource('subjects', SubjectController::class);
+
+        // 1. Route hiển thị form sửa
+        Route::get('/classrooms/{id}/edit', [ClassroomController::class, 'edit'])->name('classrooms.edit');
+
+        // 2. Route xử lý cập nhật dữ liệu
+        Route::put('/classrooms/{id}', [ClassroomController::class, 'update'])->name('classrooms.update');
+
+        // 3. Route xóa lớp học
+        Route::delete('/classrooms/{id}', [ClassroomController::class, 'destroy'])->name('classrooms.destroy');
     });
 
     // ... Bên trong middleware auth ...

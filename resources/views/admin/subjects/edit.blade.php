@@ -2,7 +2,6 @@
 
 @section('content')
 <div class="flex h-screen w-full bg-gray-100 overflow-hidden">
-    @include('layouts.sidebar')
 
     <div class="flex-1 overflow-auto p-8">
         <div class="max-w-2xl mx-auto bg-white p-6 rounded-lg shadow">

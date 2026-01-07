@@ -2,7 +2,6 @@
 
 @section('content')
 <div class="flex h-screen w-full bg-gray-100 overflow-hidden">
-    @include('layouts.sidebar')
 
     <div class="flex-1 overflow-auto p-8">
         <div class="flex justify-between items-center mb-6">
@@ -36,17 +35,27 @@
                                 {{ $class->students->count() }} SV
                             </span>
                         </td>
-                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-    
-                        <a href="{{ route('classrooms.show', $classroom->id) }}" 
-                            class="text-blue-600 hover:text-blue-900 font-bold mr-3 border border-blue-600 px-3 py-1 rounded hover:bg-blue-50">
-                                📄 Chi tiết
-                        </a>
+                        {{-- resources/views/admin/classrooms/index.blade.php --}}
 
-                        @if(Auth::user()->role == 'admin')
-                        <a href="{{ route('classrooms.edit', $classroom->id) }}" class="text-indigo-600 hover:text-indigo-900 mr-2">Sửa</a>
+                        {{-- ... Phần bảng ... --}}
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        {{-- NÚT CHI TIẾT (Thay cho nút điểm danh cũ) --}}
+                            <a href="{{ route('classrooms.show', $class->id) }}" 
+                                class="inline-block bg-blue-100 text-blue-800 font-bold px-3 py-1 rounded border border-blue-200 hover:bg-blue-200 mr-2">
+                                📄 Chi tiết
+                            </a>
+
+                    {{-- Chỉ hiển thị Sửa/Xóa nếu là Admin --}}
+                    @if(Auth::user()->role == 'admin')
+                        <a href="{{ route('classrooms.edit', $class->id) }}" class="text-indigo-600 hover:text-indigo-900 mr-2 font-bold">Sửa</a>
+        
+                        <form action="{{ route('classrooms.destroy', $class->id) }}" method="POST" class="inline-block" onsubmit="return confirm('Bạn chắc chắn muốn xóa lớp này?');">
+                    @csrf
+                    @method('DELETE')
+                        <button type="submit" class="text-red-600 hover:text-red-900 font-bold">Xóa</button>
+                        </form>
                         @endif
-                    </td>
+                        </td>
                     </tr>
                     @endforeach
                 </tbody>

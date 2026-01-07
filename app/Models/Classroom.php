@@ -32,4 +32,9 @@ class Classroom extends Model
         // Sắp xếp theo ngày tăng dần để hiển thị lịch học hợp lý
         return $this->hasMany(ClassSession::class)->orderBy('date', 'asc');
     }
+
+    public function subjectInfo()
+    {
+        return $this->belongsTo(Subject::class, 'subject', 'id');
+    }
 }

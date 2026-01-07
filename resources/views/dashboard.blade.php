@@ -4,10 +4,6 @@
 
 @section('content')
 <div class="flex h-screen w-full bg-gray-100 overflow-hidden">
-    
-    {{-- Sidebar --}}
-    @include('layouts.sidebar') 
-
     <div class="flex-1 flex flex-col min-w-0 overflow-hidden bg-gray-50">
         
         <header class="md:hidden bg-white shadow-sm flex items-center justify-between p-4 z-10">

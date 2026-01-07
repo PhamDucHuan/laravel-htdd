@@ -10,18 +10,36 @@
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        /* Tùy chỉnh thanh cuộn cho đẹp hơn */
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: #f1f1f1; }
-        ::-webkit-scrollbar-thumb { background: #888; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #555; }
-    </style>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="font-sans antialiased bg-gray-100">
-    <div class="min-h-screen w-full">
-        @yield('content')
+    
+    <div class="flex h-screen overflow-hidden">
+        
+        @auth
+            @include('layouts.sidebar')
+        @endauth
+
+        <div class="relative flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
+            
+            @if (isset($header))
+                <header class="bg-white shadow">
+                    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                        {{ $header }}
+                    </div>
+                </header>
+            @endif
+
+            <main class="flex-1 p-6">
+                @if(session('success'))
+                    <div class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative">
+                        {{ session('success') }}
+                    </div>
+                @endif
+                
+                @yield('content')
+            </main>
+        </div>
     </div>
 </body>
 </html>

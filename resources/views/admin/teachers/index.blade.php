@@ -2,7 +2,6 @@
 
 @section('content')
 <div class="flex h-screen w-full bg-gray-100 overflow-hidden">
-    @include('layouts.sidebar') {{-- Nếu bạn đã tách sidebar, hoặc copy lại sidebar cũ vào đây --}}
     
     {{-- Để code gọn, tôi giả sử bạn vẫn dùng layout app và cấu trúc như dashboard --}}
 
