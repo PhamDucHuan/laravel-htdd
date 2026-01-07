@@ -46,6 +46,7 @@ class User extends Authenticatable
             'family_info' => 'array', // Tự động chuyển JSON sang mảng khi lấy ra
         ];
     }
+    
     // Một giáo viên có thể dạy nhiều lớp
     public function classrooms()
     {

@@ -24,4 +24,10 @@ class ClassSession extends Model
     {
         return $this->belongsTo(Classroom::class);
     }
+
+    // app/Models/ClassSession.php
+public function attendances()
+{
+    return $this->hasMany(Attendance::class);
+}
 }

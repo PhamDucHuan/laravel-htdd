@@ -1,174 +1,136 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="flex h-screen w-full bg-gray-100 overflow-hidden">
-    @include('layouts.sidebar')
+<div class="container mx-auto px-4 py-8">
+    
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h2 class="text-2xl font-bold text-gray-800">Lớp: {{ $classroom->name }}</h2>
+            <p class="text-gray-600">Giáo viên: {{ $classroom->teacher->name ?? 'Chưa gán' }}</p>
+        </div>
+        <a href="{{ route('dashboard') }}" class="text-blue-500 hover:underline">&larr; Quay lại Dashboard</a>
+    </div>
 
-    <div class="flex-1 overflow-auto p-8">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
-        <div class="flex justify-between items-center mb-6">
-            <div>
-                <h2 class="text-2xl font-bold text-gray-800">Chi tiết Lớp học</h2>
-                <p class="text-gray-500 text-sm">Quản lý thông tin và danh sách sinh viên.</p>
+        <div class="lg:col-span-2 space-y-6">
+            <div class="bg-white shadow-md rounded-lg p-6">
+                <div class="flex justify-between items-center mb-4 border-b pb-2">
+                    <h3 class="text-xl font-bold text-blue-800">📅 Lịch Học & Điểm Danh</h3>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-2 text-left text-xs font-bold text-gray-500 uppercase">Ngày</th>
+                                <th class="px-4 py-2 text-left text-xs font-bold text-gray-500 uppercase">Giờ học</th>
+                                <th class="px-4 py-2 text-center text-xs font-bold text-gray-500 uppercase">Trạng thái</th>
+                                <th class="px-4 py-2 text-right text-xs font-bold text-gray-500 uppercase">Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200">
+                            @forelse($classroom->sessions as $session)
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-3 whitespace-nowrap">
+                                    <div class="font-medium text-gray-900">
+                                        {{ \Carbon\Carbon::parse($session->date)->format('d/m/Y') }}
+                                    </div>
+                                    <div class="text-xs text-gray-500">
+                                        {{ \Carbon\Carbon::parse($session->date)->dayName }}
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
+                                    {{ \Carbon\Carbon::parse($session->start_time)->format('H:i') }} - 
+                                    {{ \Carbon\Carbon::parse($session->end_time)->format('H:i') }}
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap text-center">
+                                    @if($session->attendances_count > 0)
+                                        <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                            Đã điểm danh
+                                        </span>
+                                    @else
+                                        <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                                            Chưa
+                                        </span>
+                                    @endif
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap text-right text-sm font-medium">
+                                    <a href="{{ route('attendance.create', $session->id) }}" 
+                                       class="inline-flex items-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded shadow">
+                                        📝 Điểm danh
+                                    </a>
+                                </td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="4" class="px-4 py-4 text-center text-gray-500 italic">
+                                    Chưa có lịch học. Vui lòng tạo tự động hoặc thêm thủ công.
+                                </td>
+                            </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="mt-6 pt-4 border-t">
+                    <details>
+                        <summary class="cursor-pointer text-blue-600 text-sm font-bold select-none">
+                            + Thêm buổi học bổ sung
+                        </summary>
+                        <form action="{{ route('classrooms.sessions.store', $classroom->id) }}" method="POST" class="mt-4 bg-gray-50 p-4 rounded">
+                            @csrf
+                            <div class="grid grid-cols-3 gap-4">
+                                <div>
+                                    <label class="text-xs font-bold">Ngày</label>
+                                    <input type="date" name="date" required class="w-full border rounded px-2 py-1">
+                                </div>
+                                <div>
+                                    <label class="text-xs font-bold">Bắt đầu</label>
+                                    <input type="time" name="start_time" required class="w-full border rounded px-2 py-1">
+                                </div>
+                                <div>
+                                    <label class="text-xs font-bold">Kết thúc</label>
+                                    <input type="time" name="end_time" required class="w-full border rounded px-2 py-1">
+                                </div>
+                            </div>
+                            <button type="submit" class="mt-2 bg-gray-600 text-white text-xs py-1 px-3 rounded hover:bg-gray-700">Lưu</button>
+                        </form>
+                    </details>
+                </div>
             </div>
-            <a href="{{ route('dashboard') }}" class="text-blue-600 hover:text-blue-800 flex items-center">
-                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                Quay lại Dashboard
-            </a>
         </div>
 
-        @if(session('success'))
-            <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6">
-                {{ session('success') }}
-            </div>
-        @endif
-
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            
-            <div class="lg:col-span-1 space-y-6">
-                <div class="bg-white rounded-lg shadow p-6 border-t-4 border-blue-500">
-                    <h3 class="text-lg font-bold text-gray-800 mb-4">{{ $classroom->name }}</h3>
-                    
-                    <div class="space-y-3">
-                        <div>
-                            <p class="text-xs text-gray-500 uppercase font-bold">Giáo viên phụ trách</p>
-                            <div class="flex items-center mt-1">
-                                <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold mr-2">
-                                    {{ substr($classroom->teacher->name ?? 'U', 0, 1) }}
-                                </div>
-                                <span class="font-medium">{{ $classroom->teacher->name ?? 'Chưa gán' }}</span>
-                            </div>
-                        </div>
-
-                        <div>
-                            <p class="text-xs text-gray-500 uppercase font-bold">Môn học</p>
-                            <p class="text-gray-800">{{ $classroom->subject ?? 'Chưa cập nhật' }}</p>
-                        </div>
-
-                        <div>
-                            <p class="text-xs text-gray-500 uppercase font-bold">Lịch học</p>
-                            <p class="text-gray-800 bg-gray-100 inline-block px-2 py-1 rounded text-sm">{{ $classroom->schedule }}</p>
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-2">
-                            <div>
-                                <p class="text-xs text-gray-500 uppercase font-bold">Ngày bắt đầu</p>
-                                <p class="text-sm">{{ \Carbon\Carbon::parse($classroom->start_date)->format('d/m/Y') }}</p>
+        <div class="lg:col-span-1">
+            <div class="bg-white shadow-md rounded-lg p-6">
+                <h3 class="text-lg font-bold text-gray-700 mb-4 border-b pb-2">Danh sách Sinh viên</h3>
+                
+                <ul class="space-y-3 max-h-96 overflow-y-auto">
+                    @forelse($classroom->students as $student)
+                    <li class="flex items-center justify-between p-2 hover:bg-gray-50 rounded">
+                        <div class="flex items-center">
+                            <div class="bg-blue-100 text-blue-800 font-bold rounded-full w-8 h-8 flex items-center justify-center mr-3">
+                                {{ substr($student->name, 0, 1) }}
                             </div>
                             <div>
-                                <p class="text-xs text-gray-500 uppercase font-bold">Trạng thái</p>
-                                @if($classroom->status == 'pending')
-                                    <span class="text-yellow-600 font-bold text-sm">Đang chờ</span>
-                                @elseif($classroom->status == 'started')
-                                    <span class="text-green-600 font-bold text-sm">Đang học</span>
-                                @else
-                                    <span class="text-gray-600 font-bold text-sm">Kết thúc</span>
-                                @endif
+                                <p class="text-sm font-bold text-gray-800">{{ $student->name }}</p>
+                                <p class="text-xs text-gray-500">{{ $student->email }}</p>
                             </div>
                         </div>
-                    </div>
-                </div>
+                    </li>
+                    @empty
+                    <li class="text-gray-500 text-sm italic">Chưa có sinh viên nào.</li>
+                    @endforelse
+                </ul>
 
-                <div class="bg-white rounded-lg shadow p-6">
-                    <h3 class="font-bold text-gray-800 mb-4 border-b pb-2">Thêm Sinh Viên Mới</h3>
-                    <form action="{{ route('classrooms.addStudent', $classroom->id) }}" method="POST">
+                <div class="mt-4 pt-4 border-t">
+                    <form action="{{ route('classrooms.students.add', $classroom->id) }}" method="POST">
                         @csrf
-                        <div class="space-y-3">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700">Họ và tên <span class="text-red-500">*</span></label>
-                                <input type="text" name="name" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm border p-2 focus:ring-blue-500 focus:border-blue-500">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700">Email</label>
-                                <input type="email" name="email" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm border p-2 focus:ring-blue-500 focus:border-blue-500">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700">Số điện thoại</label>
-                                <input type="text" name="phone" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm border p-2 focus:ring-blue-500 focus:border-blue-500">
-                            </div>
-                            <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition">
-                                + Thêm vào lớp
-                            </button>
-                        </div>
+                        <input type="text" name="name" placeholder="Tên sinh viên mới..." required class="w-full border rounded px-3 py-2 text-sm mb-2">
+                        <button type="submit" class="w-full bg-green-500 text-white font-bold py-2 rounded hover:bg-green-600 text-sm">
+                            + Thêm Sinh viên
+                        </button>
                     </form>
-                </div>
-            </div>
-
-            <div class="lg:col-span-2">
-                <div class="bg-white rounded-lg shadow overflow-hidden">
-                    <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gray-50">
-                        <h3 class="font-bold text-gray-700">Danh sách Sinh viên ({{ $classroom->students->count() }})</h3>
-                        <button class="text-blue-600 text-sm hover:underline">Xuất Excel</button>
-                    </div>
-                    
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">STT</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Họ tên</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Liên hệ</th>
-                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Hành động</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                @foreach($classroom->students as $index => $student)
-                                <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $index + 1 }}</td>
-                                    <td class="px-6 py-4">
-                                        <a href="{{ route('students.show', $student->id) }}" class="font-medium text-blue-600 hover:underline">
-                                            {{ $student->name }}
-                                        </a>
-                                        <div class="text-xs text-gray-500">{{ $student->email }}</div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm text-gray-900">{{ $student->email }}</div>
-                                        <div class="text-sm text-gray-500">{{ $student->phone }}</div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        <form action="{{ route('students.destroy', $student->id) }}" method="POST" class="inline-block" onsubmit="return confirm('Xóa sinh viên này khỏi lớp?');">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="text-red-600 hover:text-red-900">Xóa</button>
-                                        </form>
-                                    </td>
-                                </tr>
-
-                                <h3 class="text-xl font-bold mt-6 mb-4">Lịch Học Chi Tiết</h3>
-<table class="min-w-full bg-white border">
-    <thead>
-        <tr>
-            <th class="py-2 px-4 border">Ngày</th>
-            <th class="py-2 px-4 border">Thứ</th>
-            <th class="py-2 px-4 border">Thời gian</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach($classroom->sessions as $session) 
-        <tr>
-            <td class="py-2 px-4 border">{{ \Carbon\Carbon::parse($session->date)->format('d/m/Y') }}</td>
-            <td class="py-2 px-4 border">
-                {{ \Carbon\Carbon::parse($session->date)->dayName }}
-            </td>
-            <td class="py-2 px-4 border">
-                {{ $session->start_time }} - {{ $session->end_time }}
-            </td>
-        </tr>
-        @endforeach
-    </tbody>
-</table>
-                                @endforeach
-
-                                @if($classroom->students->isEmpty())
-                                <tr>
-                                    <td colspan="4" class="px-6 py-10 text-center text-gray-500">
-                                        Chưa có sinh viên nào trong lớp này.
-                                    </td>
-                                </tr>
-                                @endif
-                            </tbody>
-                        </table>
-                    </div>
                 </div>
             </div>
         </div>

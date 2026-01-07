@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@extends('layouts.app')
+
 @section('content')
 <div class="flex h-screen w-full bg-gray-100 overflow-hidden">
     

@@ -74,12 +74,36 @@ class ClassroomController extends Controller
             ->with('success', 'Đã tạo lớp học và lịch học thành công!');
     }
 
+    public function storeSession(Request $request, $id)
+    {
+        $request->validate([
+            'date' => 'required|date',
+            'start_time' => 'required',
+            'end_time' => 'required|after:start_time',
+        ], [
+            'end_time.after' => 'Giờ kết thúc phải sau giờ bắt đầu.',
+        ]);
+
+        ClassSession::create([
+            'classroom_id' => $id,
+            'date' => $request->date,
+            'start_time' => $request->start_time,
+            'end_time' => $request->end_time,
+        ]);
+
+        return back()->with('success', 'Đã thêm buổi học mới thành công!');
+    }
+
     // Xem chi tiết lớp
     public function show($id)
-    {
-        $classroom = Classroom::with(['teacher', 'students', 'sessions'])->findOrFail($id);
-        return view('admin.classrooms.show', compact('classroom'));
-    }
+{
+    // Lấy lớp học + sinh viên + các buổi học (kèm đếm số lượt điểm danh)
+    $classroom = Classroom::with(['teacher', 'students', 'sessions' => function($query) {
+        $query->withCount('attendances'); // Đếm xem buổi này đã có dữ liệu điểm danh chưa
+    }])->findOrFail($id);
+    
+    return view('admin.classrooms.show', compact('classroom'));
+}
 
     // Thêm sinh viên vào lớp
     public function addStudent(Request $request, $id)

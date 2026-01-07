@@ -10,10 +10,20 @@ class Attendance extends Model
     use HasFactory;
 
     protected $fillable = [
-        'classroom_id', 'student_id', 'attendance_date', 'status', 'note'
+        'class_session_id', // <-- Cột mới
+        'student_id',
+        'status',
+        'remarks',          // <-- Tên cột ghi chú
     ];
 
-    public function student() {
+    // Quan hệ ngược lại với Buổi học
+    public function session()
+    {
+        return $this->belongsTo(ClassSession::class, 'class_session_id');
+    }
+
+    public function student()
+    {
         return $this->belongsTo(Student::class);
     }
 }

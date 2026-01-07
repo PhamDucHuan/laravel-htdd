@@ -2,51 +2,50 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Attendance;
-use App\Models\Classroom;
 use Illuminate\Http\Request;
-use Carbon\Carbon;
+use App\Models\ClassSession;
+use App\Models\Attendance;
+use App\Models\Student;
 
 class AttendanceController extends Controller
 {
-    // Hiển thị danh sách sinh viên để điểm danh
-    public function create($classroomId)
+    // 1. Hiển thị form điểm danh cho một buổi học cụ thể (Session)
+    public function create($session_id)
     {
-        $classroom = Classroom::with('students')->findOrFail($classroomId);
-        $date = Carbon::today()->format('Y-m-d');
+        // Lấy thông tin buổi học + Lớp + Danh sách sinh viên của lớp đó
+        $session = ClassSession::with('classroom.students')->findOrFail($session_id);
+        
+        // Lấy dữ liệu điểm danh cũ (nếu đã điểm danh rồi) để hiển thị lại
+        $attendances = Attendance::where('class_session_id', $session_id)
+                                 ->pluck('status', 'student_id')
+                                 ->toArray();
 
-        // Lấy thông tin điểm danh cũ (nếu có)
-        $attendances = Attendance::where('classroom_id', $classroomId)
-                                 ->where('attendance_date', $date)
-                                 ->get()
-                                 ->keyBy('student_id');
-
-        // Trỏ đúng vào thư mục admin/teachers/attendance
-        return view('admin.teachers.attendance.create', compact('classroom', 'date', 'attendances'));    
+        // Trả về view (Bạn cần tạo file view này ở bước phụ bên dưới)
+        return view('admin.teachers.attendance.create', compact('session', 'attendances'));
     }
 
-    // Lưu kết quả điểm danh
-    public function store(Request $request, $classroomId)
+    // 2. Lưu dữ liệu điểm danh
+    public function store(Request $request)
     {
-        $date = Carbon::today()->format('Y-m-d');
-        $data = $request->attendance; // Mảng dữ liệu: [student_id => status]
+        $request->validate([
+            'session_id' => 'required|exists:class_sessions,id',
+            'attendance' => 'required|array', // Mảng: [student_id => status]
+        ]);
 
-        if ($data) {
-            foreach ($data as $studentId => $status) {
-                Attendance::updateOrCreate(
-                    [
-                        'classroom_id' => $classroomId,
-                        'student_id' => $studentId,
-                        'attendance_date' => $date,
-                    ],
-                    [
-                        'status' => $status,
-                        'note' => $request->note[$studentId] ?? null,
-                    ]
-                );
-            }
+        foreach ($request->attendance as $student_id => $status) {
+            Attendance::updateOrCreate(
+                [
+                    'class_session_id' => $request->session_id,
+                    'student_id' => $student_id
+                ],
+                [
+                    'status' => $status, // 'present', 'absent', 'late'
+                    'remarks' => $request->remarks[$student_id] ?? null // Ghi chú nếu có
+                ]
+            );
         }
 
-        return redirect()->route('dashboard')->with('success', 'Đã lưu điểm danh ngày ' . date('d/m/Y'));
+        return redirect()->route('classrooms.show', $request->classroom_id)
+                         ->with('success', 'Đã lưu điểm danh thành công!');
     }
 }
