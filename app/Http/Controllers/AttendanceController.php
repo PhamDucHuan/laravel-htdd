@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\ClassSession;
 use App\Models\Attendance;
-use App\Models\Student;
 
 class AttendanceController extends Controller
 {
