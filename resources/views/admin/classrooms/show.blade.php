@@ -41,49 +41,84 @@
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
                             @forelse($classroom->sessions as $session)
-                            <tr class="hover:bg-blue-50 transition duration-150">
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm font-bold text-gray-900">
-                                        {{ \Carbon\Carbon::parse($session->date)->format('d/m/Y') }}
-                                    </div>
-                                    <div class="text-xs text-gray-500">
-                                        {{ \Carbon\Carbon::parse($session->start_time)->format('H:i') }} - 
-                                        {{ \Carbon\Carbon::parse($session->end_time)->format('H:i') }}
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
-                                        {{ \Carbon\Carbon::parse($session->date)->dayName }}
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-center">
-                                    @if($session->attendances->count() > 0)
-                                        <span class="px-2 py-1 text-xs font-bold text-green-700 bg-green-100 rounded-full border border-green-200">
-                                            ✓ Đã điểm danh
-                                        </span>
-                                    @else
-                                        <span class="px-2 py-1 text-xs font-bold text-yellow-700 bg-yellow-100 rounded-full border border-yellow-200">
-                                            Chưa điểm danh
-                                        </span>
-                                    @endif
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                    <a href="{{ route('attendance.create', $session->id) }}" 
-                                       class="inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                                        📝 Điểm Danh
-                                    </a>
-                                </td>
-                            </tr>
-                            @empty
-                            <tr>
-                                <td colspan="4" class="px-6 py-10 text-center text-gray-500 italic">
-                                    <div class="flex flex-col items-center">
-                                        <svg class="w-12 h-12 text-gray-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                                        <p>Lớp này chưa có lịch học nào được tạo.</p>
-                                    </div>
-                                </td>
-                            </tr>
-                            @endforelse
+    @php
+        // Xử lý logic thời gian ngay tại đây
+        $startTime = \Carbon\Carbon::parse($session->start_time);
+        $endTime   = \Carbon\Carbon::parse($session->end_time);
+        
+        // Kiểm tra: Nếu giờ bắt đầu < 12h trưa là Sáng, ngược lại là Chiều
+        $isMorning = $startTime->hour < 12;
+    @endphp
+
+    <tr class="hover:bg-blue-50 transition duration-150 border-b border-gray-100">
+        
+        {{-- Cột 1: Ngày & Giờ --}}
+        <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm font-bold text-gray-900">
+                {{ \Carbon\Carbon::parse($session->date)->format('d/m/Y') }}
+            </div>
+            <div class="text-xs text-gray-500 mt-1">
+                ⏰ {{ $startTime->format('H:i') }} - {{ $endTime->format('H:i') }}
+            </div>
+        </td>
+
+        {{-- Cột 2: Thứ & Buổi (Sáng/Chiều) --}}
+        <td class="px-6 py-4 whitespace-nowrap">
+            <div class="flex flex-col gap-1">
+                {{-- Hiển thị Thứ --}}
+                <span class="text-xs font-semibold text-gray-500 uppercase">
+                    {{ \Carbon\Carbon::parse($session->date)->dayName }}
+                </span>
+
+                {{-- Hiển thị Badge Sáng/Chiều --}}
+                @if($isMorning)
+                    <span class="w-fit px-2 py-1 inline-flex text-xs leading-5 font-bold rounded-full bg-amber-100 text-amber-800 border border-amber-200">
+                        🌅 Buổi Sáng
+                    </span>
+                @else
+                    <span class="w-fit px-2 py-1 inline-flex text-xs leading-5 font-bold rounded-full bg-sky-100 text-sky-800 border border-sky-200">
+                        🌆 Buổi Chiều
+                    </span>
+                @endif
+            </div>
+        </td>
+
+        {{-- Cột 3: Trạng thái điểm danh --}}
+        <td class="px-6 py-4 whitespace-nowrap text-center">
+            @if($session->attendances->count() > 0)
+                <span class="px-3 py-1 text-xs font-bold text-green-700 bg-green-100 rounded-full border border-green-200">
+                    ✓ Đã điểm danh
+                </span>
+            @else
+                <span class="px-3 py-1 text-xs font-bold text-yellow-700 bg-yellow-100 rounded-full border border-yellow-200">
+                    ⏳ Chưa điểm danh
+                </span>
+            @endif
+        </td>
+
+        {{-- Cột 4: Nút bấm --}}
+        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+            <a href="{{ route('attendance.create', $session->id) }}" 
+               class="inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white {{ $session->attendances->count() > 0 ? 'bg-green-600 hover:bg-green-700' : 'bg-blue-600 hover:bg-blue-700' }} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                
+                @if($session->attendances->count() > 0)
+                    ✏️ Sửa điểm danh
+                @else
+                    📝 Điểm Danh
+                @endif
+            </a>
+        </td>
+    </tr>
+@empty
+    <tr>
+        <td colspan="4" class="px-6 py-10 text-center text-gray-500 italic">
+            <div class="flex flex-col items-center">
+                <svg class="w-12 h-12 text-gray-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                <p>Lớp này chưa có lịch học nào được tạo.</p>
+            </div>
+        </td>
+    </tr>
+@endforelse
                         </tbody>
                     </table>
                 </div>

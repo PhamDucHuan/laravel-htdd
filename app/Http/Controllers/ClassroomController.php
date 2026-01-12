@@ -8,6 +8,7 @@ use App\Models\Subject;
 use App\Models\ClassSession; // <-- Bắt buộc có để tạo lịch
 use Illuminate\Http\Request;
 use Carbon\Carbon;           // <-- Bắt buộc để xử lý ngày tháng
+use App\Models\Student;
 
 class ClassroomController extends Controller
 {
@@ -179,4 +180,60 @@ public function show($id)
 
         return redirect()->back()->with('success', 'Đã xóa lớp học thành công!');
     }
+
+    // --- Thêm vào App/Http/Controllers/ClassroomController.php ---
+
+    // 1. Hiển thị form chỉnh sửa
+    public function edit($id)
+{
+    // Thêm with('students') để lấy danh sách học viên của lớp này
+    $classroom = Classroom::with('students')->findOrFail($id);
+    
+    $teachers = User::where('role', 'teacher')->get();
+    $subjects = Subject::all();
+    
+    return view('admin.classrooms.edit', compact('classroom', 'teachers', 'subjects'));
+}
+
+// 2. Cập nhật hàm update
+public function update(Request $request, $id)
+{
+    $request->validate([
+        'name' => 'required|string|max:255',
+        'teacher_id' => 'required|exists:users,id',
+        'subject_id' => 'required',
+        'description' => 'nullable|string',
+        // Validate mảng dữ liệu học viên (nếu có)
+        'students.*.name' => 'required|string|max:255',
+        'students.*.phone' => 'nullable|string|max:20',
+    ]);
+
+    $classroom = Classroom::findOrFail($id);
+
+    // 1. Cập nhật thông tin Lớp học
+    $classroom->update([
+        'name' => $request->name,
+        'teacher_id' => $request->teacher_id,
+        'subject' => $request->subject_id,
+        'description' => $request->description,
+    ]);
+
+    // 2. Cập nhật thông tin Học viên (Vòng lặp thần thánh)
+    if ($request->has('students')) {
+        foreach ($request->students as $studentId => $data) {
+            // Tìm học viên và cập nhật
+            $student = Student::find($studentId);
+            if ($student) {
+                $student->update([
+                    'name' => $data['name'],
+                    'phone' => $data['phone'],
+                    // Bạn có thể thêm email nếu muốn sửa luôn email
+                    // 'email' => $data['email'], 
+                ]);
+            }
+        }
+    }
+
+    return redirect()->route('classrooms.index')->with('success', 'Cập nhật lớp học và danh sách học viên thành công!');
+}
 }
