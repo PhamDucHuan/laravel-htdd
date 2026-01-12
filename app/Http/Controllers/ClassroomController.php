@@ -28,51 +28,77 @@ class ClassroomController extends Controller
     }
 
     // Xử lý lưu lớp học và tạo lịch tự động
-    public function store(Request $request)
-    {
-        // 1. Validate dữ liệu
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'teacher_id' => 'required|exists:users,id',
-            'subject_id' => 'required', // Sửa từ 'subject' thành 'subject_id' cho khớp với Form
-            'start_date' => 'required|date',
-            'end_date'   => 'required|date|after_or_equal:start_date',
-            'days'       => 'required|array|min:1', // Bắt buộc chọn ít nhất 1 thứ
-        ]);
+    // app/Http/Controllers/ClassroomController.php
 
-        // 2. Tạo Lớp học (Classroom)
-        // Lưu ý: Nếu database của bạn cột là 'subject' (string), ta lưu tạm subject_id vào đó
-        $classroom = Classroom::create([
-            'name' => $request->name,
-            'teacher_id' => $request->teacher_id,
-            'subject' => $request->subject_id, // Lưu ID môn học
-            'start_date' => $request->start_date,
-            'end_date' => $request->end_date,
-            'description' => $request->description,
-            'schedule' => implode(',', $request->days), // Lưu tạm các thứ đã chọn (VD: "2,4,6")
-            'status' => 'pending',
-        ]);
+public function store(Request $request)
+{
+    // 1. Validate dữ liệu
+    $request->validate([
+        'name' => 'required|string|max:255',
+        'teacher_id' => 'required|exists:users,id',
+        'subject_id' => 'required',
+        'start_date' => 'required|date',
+        'end_date'   => 'required|date|after_or_equal:start_date',
+        'days'       => 'required|array|min:1',
+        // Validate giờ: Bắt buộc phải nhập ít nhất 1 buổi (Sáng hoặc Chiều)
+        'morning_start' => 'nullable',
+        'morning_end'   => 'nullable|after:morning_start',
+        'afternoon_start' => 'nullable',
+        'afternoon_end'   => 'nullable|after:afternoon_start',
+    ]);
 
-        // 3. LOGIC TỰ ĐỘNG TẠO BUỔI HỌC (Loop từ ngày bắt đầu -> kết thúc)
-        $startDate = Carbon::parse($request->start_date);
-        $endDate   = Carbon::parse($request->end_date);
-        $daysOfWeek = $request->days; // Mảng các thứ: [2, 4, 6]
+    // Kiểm tra xem người dùng có nhập ít nhất 1 khung giờ không
+    if (!$request->morning_start && !$request->afternoon_start) {
+        return back()->withErrors(['time_error' => 'Bạn phải nhập thời gian cho ít nhất là Buổi Sáng hoặc Buổi Chiều.'])->withInput();
+    }
 
-        for ($date = $startDate; $date->lte($endDate); $date->addDay()) {
-            // Kiểm tra nếu ngày hiện tại trùng với thứ đã chọn
-            if (in_array($date->dayOfWeekIso, $daysOfWeek)) {
+    // 2. Tạo Lớp học
+    $classroom = Classroom::create([
+        'name' => $request->name,
+        'teacher_id' => $request->teacher_id,
+        'subject' => $request->subject_id,
+        'start_date' => $request->start_date,
+        'end_date' => $request->end_date,
+        'description' => $request->description,
+        'schedule' => implode(',', $request->days),
+        'status' => 'pending',
+    ]);
+
+    // 3. LOGIC TỰ ĐỘNG TẠO BUỔI HỌC (2 BUỔI/NGÀY)
+    $startDate = Carbon::parse($request->start_date);
+    $endDate   = Carbon::parse($request->end_date);
+    $daysOfWeek = $request->days;
+
+    for ($date = $startDate; $date->lte($endDate); $date->addDay()) {
+        
+        // Nếu ngày hiện tại trùng với thứ đã chọn
+        if (in_array($date->dayOfWeekIso, $daysOfWeek)) {
+            
+            // --- TẠO BUỔI SÁNG (Nếu có nhập giờ) ---
+            if ($request->morning_start && $request->morning_end) {
                 ClassSession::create([
                     'classroom_id' => $classroom->id,
                     'date'         => $date->format('Y-m-d'),
-                    'start_time'   => $request->session_start_time,
-                    'end_time'     => $request->session_end_time,
+                    'start_time'   => $request->morning_start,
+                    'end_time'     => $request->morning_end,
+                ]);
+            }
+
+            // --- TẠO BUỔI CHIỀU (Nếu có nhập giờ) ---
+            if ($request->afternoon_start && $request->afternoon_end) {
+                ClassSession::create([
+                    'classroom_id' => $classroom->id,
+                    'date'         => $date->format('Y-m-d'),
+                    'start_time'   => $request->afternoon_start,
+                    'end_time'     => $request->afternoon_end,
                 ]);
             }
         }
-
-        return redirect()->route('classrooms.index')
-            ->with('success', 'Đã tạo lớp học và lịch học thành công!');
     }
+
+    return redirect()->route('classrooms.index')
+        ->with('success', 'Đã tạo lớp học và lịch học (Sáng/Chiều) thành công!');
+}
 
     public function storeSession(Request $request, $id)
     {
@@ -140,5 +166,17 @@ public function show($id)
                                ->get();
     
         return view('teachers.classrooms.index', compact('classrooms'));
+    }
+
+    // Xóa lớp học
+    public function destroy($id)
+    {
+        // Tìm lớp học
+        $classroom = Classroom::findOrFail($id);
+
+        // Xóa lớp (Các bảng liên quan như class_sessions sẽ tự xóa theo nếu đã cài cascade trong database)
+        $classroom->delete();
+
+        return redirect()->back()->with('success', 'Đã xóa lớp học thành công!');
     }
 }

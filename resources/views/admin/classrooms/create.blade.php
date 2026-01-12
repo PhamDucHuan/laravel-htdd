@@ -86,29 +86,58 @@
                         <div class="mt-8 border-t pt-6">
     <h3 class="text-lg font-bold text-gray-800 mb-4">Cấu hình Lịch học Tự động</h3>
     
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         <div>
-            <label class="block text-gray-700 font-bold mb-2">Ngày bắt đầu khóa học</label>
-            <input type="date" name="start_date" required class="shadow border rounded w-full py-2 px-3 text-gray-700">
-        </div>
-        <div>
-            <label class="block text-gray-700 font-bold mb-2">Ngày kết thúc dự kiến</label>
-            <input type="date" name="end_date" required class="shadow border rounded w-full py-2 px-3 text-gray-700">
+            <label class="block text-gray-700 font-bold mb-2">Thời gian khóa học</label>
+            <div class="space-y-3">
+                <div>
+                    <label class="text-xs font-bold text-gray-500">Ngày bắt đầu</label>
+                    <input type="date" name="start_date" required class="shadow border rounded w-full py-2 px-3">
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-gray-500">Ngày kết thúc</label>
+                    <input type="date" name="end_date" required class="shadow border rounded w-full py-2 px-3">
+                </div>
+            </div>
         </div>
 
-        <div>
-            <label class="block text-gray-700 font-bold mb-2">Giờ vào lớp</label>
-            <input type="time" name="session_start_time" class="shadow border rounded w-full py-2 px-3 text-gray-700">
-        </div>
-        <div>
-            <label class="block text-gray-700 font-bold mb-2">Giờ tan lớp</label>
-            <input type="time" name="session_end_time" class="shadow border rounded w-full py-2 px-3 text-gray-700">
+        <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+            <p class="font-bold text-blue-800 mb-3 text-sm">Cấu hình Ca học (Nhập giờ nếu có học)</p>
+            
+            <div class="mb-3 border-b pb-3 border-blue-200">
+                <label class="block text-xs font-bold text-gray-600 mb-1 uppercase">🌞 Buổi Sáng</label>
+                <div class="flex gap-2">
+                    <div class="w-1/2">
+                        <span class="text-xs text-gray-500">Bắt đầu</span>
+                        <input type="time" name="morning_start" class="shadow border rounded w-full py-1 px-2 text-sm">
+                    </div>
+                    <div class="w-1/2">
+                        <span class="text-xs text-gray-500">Kết thúc</span>
+                        <input type="time" name="morning_end" class="shadow border rounded w-full py-1 px-2 text-sm">
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-gray-600 mb-1 uppercase">🌆 Buổi Chiều</label>
+                <div class="flex gap-2">
+                    <div class="w-1/2">
+                        <span class="text-xs text-gray-500">Bắt đầu</span>
+                        <input type="time" name="afternoon_start" class="shadow border rounded w-full py-1 px-2 text-sm">
+                    </div>
+                    <div class="w-1/2">
+                        <span class="text-xs text-gray-500">Kết thúc</span>
+                        <input type="time" name="afternoon_end" class="shadow border rounded w-full py-1 px-2 text-sm">
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
     <div class="mb-4">
-        <label class="block text-gray-700 font-bold mb-2">Chọn các thứ trong tuần học:</label>
+        <label class="block text-gray-700 font-bold mb-2">Chọn các thứ trong tuần sẽ học:</label>
         <div class="flex flex-wrap gap-4">
+            {{-- Giữ nguyên phần checkbox chọn thứ --}}
             <label class="inline-flex items-center">
                 <input type="checkbox" name="days[]" value="1" class="form-checkbox h-5 w-5 text-blue-600">
                 <span class="ml-2">Thứ 2</span>
