@@ -9,18 +9,20 @@ use App\Models\Attendance;
 class AttendanceController extends Controller
 {
     // 1. Hiển thị form điểm danh cho một buổi học cụ thể (Session)
+    // app/Http/Controllers/AttendanceController.php
+
     public function create($session_id)
     {
-        // Lấy thông tin buổi học + Lớp + Danh sách sinh viên của lớp đó
-        $session = ClassSession::with('classroom.students')->findOrFail($session_id);
-        
-        // Lấy dữ liệu điểm danh cũ (nếu đã điểm danh rồi) để hiển thị lại
-        $attendances = Attendance::where('class_session_id', $session_id)
-                                 ->pluck('status', 'student_id')
-                                 ->toArray();
+    // Lấy thông tin buổi học + Lớp + Danh sách sinh viên
+    $session = ClassSession::with('classroom.students')->findOrFail($session_id);
+    
+    // SỬA ĐOẠN NÀY:
+    // Thay vì dùng pluck, ta lấy toàn bộ object và keyBy('student_id') để dễ truy xuất ở View
+    $attendances = Attendance::where('class_session_id', $session_id)
+                             ->get()
+                             ->keyBy('student_id'); // Kết quả: [student_id => {object Attendance}]
 
-        // Trả về view (Bạn cần tạo file view này ở bước phụ bên dưới)
-        return view('admin.teachers.attendance.create', compact('session', 'attendances'));
+    return view('admin.teachers.attendance.create', compact('session', 'attendances'));
     }
 
     // 2. Lưu dữ liệu điểm danh
